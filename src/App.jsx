@@ -65,7 +65,7 @@ function App() {
         staleTime: 0,
         retry: 3, // 재시도 증가 (다른 프록시 시도를 위해)
         retryDelay: 1000, // 1초 후 재시도
-        refetchInterval: 5000,
+        refetchInterval: 1000,
         refetchIntervalInBackground: false,
         refetchOnWindowFocus: true,
         queryFn: fetchData
