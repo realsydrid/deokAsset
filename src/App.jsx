@@ -119,6 +119,15 @@ function App() {
                             <span>오늘 받는 보너스: </span>
                             <span>{formatDecimalsWithCommas(Number(coinPrice.tickers[0].quote_volume) / Number(coinPrice.tickers[0].target_volume) * 150000, 0)} 원</span>
                         </p>
+                        <hr/>
+                        <p className={highlight ? 'highlight' : ''}>
+                            <span>거래금액: </span>
+                            <span>{formatDecimalsWithCommas(Number(coinPrice.tickers[0].quote_volume))} 원</span>
+                        </p>
+                        <p className={highlight ? 'highlight' : ''}>
+                            <span>거래량 : </span>
+                            <span>{formatDecimalsWithCommas(Number(coinPrice.tickers[0].target_volume))} GM</span>
+                        </p>
                         <p>
                             <small>
                                 최종 업데이트: {lastUpdated.toLocaleTimeString()} (실시간 API)
