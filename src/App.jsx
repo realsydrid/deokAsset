@@ -8,6 +8,11 @@ import './App.css'
 import {useQuery} from "@tanstack/react-query";
 import profileImage from './assets/KakaoTalk_Photo_2025-04-16-19-27-18.jpeg';
 
+// API 환경 설정
+const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const API_BASE_URL = 'https://api.coinone.co.kr';
+const API_PATH = "/public/v2/ticker_new/KRW/GM?additional_data=true";
+
 function App() {
     const [coinPrice, setCoinPrice] = useState([])
     const [highlight, setHighlight] = useState(false)
@@ -19,14 +24,24 @@ function App() {
         retry:1,
         refetchInterval:1000,
         queryFn: async ()=>{
-            const URL="/api/public/v2/ticker_new/KRW/GM?additional_data=true"
+            // 개발 환경에서는 프록시를, 프로덕션 환경에서는 직접 URL 사용
+            const URL = isDev 
+                ? `/api${API_PATH}`  // 개발 환경: Vite 프록시 사용
+                : `${API_BASE_URL}${API_PATH}`; // 프로덕션 환경: 직접 API 호출
+            
             try {
                 await new Promise(resolve => setTimeout(resolve, 0));
-                const res = await fetch(URL);
+                const res = await fetch(URL, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                    }
+                });
                 if (!res.ok) throw new Error(res.status + "");
                 return res.json();
 
             } catch (error) {
+                console.error("API 호출 오류:", error);
                 throw new Error(error);
             }
         }
