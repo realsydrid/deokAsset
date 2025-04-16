@@ -36,7 +36,7 @@ function App() {
         queryKey:["apiData"],
         staleTime: 1000,
         retry:1,
-        refetchInterval:1000,
+        refetchInterval:500,
         queryFn: async ()=>{
             // 항상 "실시간처럼 보이는" 모의 데이터 사용
             try {
@@ -45,7 +45,7 @@ function App() {
                 
                 // 현재 시간을 기준으로 가격 변동 (사인 함수로 자연스러운 변동 추가)
                 const now = Date.now();
-                const basePrice = 54.4;
+                const basePrice = 52.65; // 최신 last 값으로 변경
                 
                 // 매 시간마다 다른 변동 패턴 (정현파 + 약간의 노이즈)
                 const hourCycle = Math.sin(now / 3600000 * Math.PI) * 0.08; // 시간당 사이클
@@ -55,9 +55,11 @@ function App() {
                 const variancePercent = hourCycle + minuteCycle + microCycle;
                 const variance = 1 + variancePercent;
                 
-                // 가격 업데이트 (소수점 1자리까지 표시)
-                const newPrice = (basePrice * variance).toFixed(1);
-                mockedResponse.tickers[0].best_asks[0].price = newPrice.toString();
+                // 가격 업데이트 (소수점 2자리까지 표시)
+                const newPrice = (basePrice * variance).toFixed(2);
+                mockedResponse.tickers[0].last = newPrice.toString(); // last 값 업데이트
+                mockedResponse.tickers[0].best_asks[0].price = (Number(newPrice) * 1.02).toFixed(2).toString(); // 매도호가는 약간 높게
+                mockedResponse.tickers[0].best_bids[0].price = (Number(newPrice) * 0.98).toFixed(2).toString(); // 매수호가는 약간 낮게
                 
                 // 거래량도 시간에 따라 변화
                 const volumeBase = 4034269;
@@ -102,7 +104,7 @@ function App() {
     }, [apiData])
     
     // 데이터가 로드되었는지 확인
-    const isDataLoaded = coinPrice && coinPrice.tickers && coinPrice.tickers[0]?.best_asks;
+    const isDataLoaded = coinPrice && coinPrice.tickers && coinPrice.tickers[0]?.last;
 
     return (
         <>
@@ -116,16 +118,16 @@ function App() {
                 {isDataLoaded &&
                     <>
                         <p className={highlight ? 'highlight' : ''}>
+                            <span>곰블코인 현재가격: </span>
+                            <span>{coinPrice.tickers[0].last}</span>
+                        </p>
+                        <p className={highlight ? 'highlight' : ''}>
                             <span>임덕균 4년 옵션 자산: </span>
-                            <span>{formatDecimalsWithCommas(Number(coinPrice.tickers[0].best_asks[0].price) * 3000000, 2)} 원</span>
+                            <span>{formatDecimalsWithCommas(Number(coinPrice.tickers[0].last) * 3000000, 2)} 원</span>
                         </p>
                         <p className={highlight ? 'highlight' : ''}>
                             <span>오늘 받는 보너스: </span>
                             <span>{formatDecimalsWithCommas(Number(coinPrice.tickers[0].quote_volume) / Number(coinPrice.tickers[0].target_volume) * 150000, 0)} 원</span>
-                        </p>
-                        <p className={highlight ? 'highlight' : ''}>
-                            <span>실시간 평균체결금액: </span>
-                            <span>{formatDecimalsWithCommas(Number(coinPrice.tickers[0].quote_volume) / Number(coinPrice.tickers[0].target_volume), 2)} 원</span>
                         </p>
                         <p>
                             <small>최종 업데이트: {new Date().toLocaleTimeString()}</small>
